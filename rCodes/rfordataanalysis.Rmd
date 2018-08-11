@@ -1,0 +1,107 @@
+---
+title: "R_for_Data_Science"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+```{r }
+library(tidyverse)
+library(magrittr)
+df <- mpg
+str(df)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r }
+ggplot(df)+
+  geom_point(aes(x=drv,y=cyl))
+```
+
+```{r}
+ggplot(df)+
+  geom_point(aes(x= displ, y = hwy))+
+  facet_wrap(~class,nrow=2)
+```
+
+```{r}
+?geom_smooth
+#exercies 3.6.1.6
+p <- ggplot(data=df,aes(x=displ,y=hwy))
+p+geom_point(size=4)+geom_smooth(se=F,color="blue")
+p+geom_point(size=4)+geom_smooth(se=F,aes(group=drv))
+p+geom_point(aes(color=drv))+geom_smooth(se=F,aes(color=drv))
+p+geom_point(aes(color=drv))+geom_smooth(se=F)
+p+geom_point(aes(color=drv))+geom_smooth(se=F,aes(linetype=drv))
+p+geom_point(aes(color=drv),alpha=0.8)
+```
+
+EX 3.7.1
+stat_summary operates on unique x
+
+geom_bar makes the height of the bar proportional to the number of cases in each group.geom_bar uses stat_count by default: it counts the number of cases at each x position.
+
+If you want the heights of the bars to represent values in the data, use geom_col instead.geom_col uses stat_identity: it leaves the data as is.
+```{r}
+?stat_summary
+ggplot(data = diamonds) + 
+  stat_summary(
+    mapping = aes(x = cut, y = depth),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
+?geom_col
+
+ggplot(data=df)+geom_col(aes(x=displ))
+ggplot(data=df)+geom_bar(aes(x=displ))
+ggplot(diamonds)+geom_boxplot(aes(x=cut,y=depth))
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = ..prop..))
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y =..prop..,fill=color))
+```
+
+```{r}
+?geom_jitter
+?geom_count
+ggplot(data=df)+geom_jitter(aes(x=cty,y=hwy),width=0.35)
+ggplot(data=df)+geom_count(aes(cty,hwy))
+ggplot(data=df)+stat_sum(aes(cty,hwy))
+```
+```{r}
+bar <- ggplot(data = diamonds) + 
+  geom_bar(
+    mapping = aes(x = cut, fill = cut), 
+    show.legend = FALSE,
+    width = 1
+  ) + 
+  theme(aspect.ratio = 1) +
+  labs(x = NULL, y = NULL)
+
+bar + coord_flip()
+bar + coord_polar()
+```
+
+
+```{r}
+install.packages("map_data")
+library(map_data)
+nz <- map_data("nz")
+
+ggplot(nz, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black")
+
+ggplot(nz, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black") +
+  coord_quickmap()
+```
+

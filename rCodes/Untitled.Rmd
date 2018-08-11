@@ -1,0 +1,98 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(hflights)
+library(magrittr)
+library(scales)
+library(reshape2)
+library(gcookbook)
+```
+
+## R Markdown
+
+*This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.*
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+Plot time on x-axis, total_bill on the y-axis, colored by smoker and shaped by sex.
+```{r }
+library(reshape2)
+data <- reshape2::tips
+glimpse(data)
+data %>% ggplot()+geom_point(aes(x=time,y=total_bill,color=smoker,shape=sex))
+
+```
+
+jitter the previous plot so points are more visible
+```{r}
+data %>% ggplot()+geom_point(aes(x=time,y=total_bill,color=smoker,shape=sex),position = "jitter")
+```
+Create a graph with time on the x-axis, mean tip on the y-axis, shaped and coloured by sex.
+```{r eval=F}
+meanTip <- data %>% mutate(tipPct = tip/total_bill)
+  group_by(sex,time) %>% summarize(mean_tip =mean(tipPct,na.rm=T)) 
+meanTip %>% ggplot()+
+  geom_line(aes(x=time,y=mean_tip,group = sex),linetype="dotted")+
+  geom_point(aes(x=time,y=tipPrct,color=sex,shape=sex),size=8,alpha=0.4)+
+  scale_y_continuous(limits=c(0.145,0.17),breaks = seq(0.15, 0.18, by = 0.005))+
+  xlab("\nMeal Time") +
+  ylab("Mean Percent Tip\n")
+```
+
+Create a graph with time on the x-axis, smoker on the y-axis,
+colored by sex and sized by prctTip, with a minimalist theme.
+
+
+```{r eval=F}
+data %>% 
+  mutate(prctTip = tip/total_bill) %>% 
+  ggplot()+
+  geom_point(aes(x = time, y = smoker,color=sex,size=prctTip),position="jitter")+
+  xlab("\nMeal Time")+
+  ylab("Smoker/Non-smoker")+
+  theme(axis.text.x = element_text(colour="grey20",size=14),
+        axis.text.y = element_text(colour = "grey20",size=14)
+        )+
+  guides(colour = guide_legend("Gender"), size = guide_legend("% Tip"))
+  +theme_minimal()
+```
+Create a stacked bar graph with time on x-axis, count on the y-axis, filled by sex.
+```{r}
+data %>% 
+  ggplot()+
+  geom_bar(aes(x=time,fill=sex),alpha=0.4)+scale_fill_discrete(name="Gender")
+```
+ Create a dodged bar graph with time on x-axis, count on the y-axis, filled by sex.
+```{r}
+data %>% 
+  ggplot()+geom_bar(aes(x=time,fill=sex),position="dodge")
+```
+ 
+Create a bar graph with time on x-axis, count on the y-axis, and include the values of each bar.
+
+```{r}
+data %>% count(time) %>% 
+  ggplot()+
+    geom_bar(aes(x=time,y=n),stat = "identity", colour = "grey50")+
+  xlab("\nTime") +geom_text(aes(x = time, y = n, label = n), vjust = 1.5, colour = "white")+
+  ylab("n\n")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -1,0 +1,273 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+Test all about type, class, and  mode.
+```{r}
+10352/987653 #
+2^6*99
+914545%%33
+cat("\014")
+```
+
+kp1 : function masking, when different package contains same name for certain function, should you be careful. A good example is in library(Hmisc), the function summarize share the same name as that in library(dplyr), so when doing piping, use dplyr::summarize to make sure it works. 
+
+About packages.
+From installed.packages(), you will get installed.packages scans the ‘DESCRIPTION’ files of each package found along lib.loc and returns a matrix of package names, library paths and version numbers.
+```{r eval=F}
+#install package:
+install.packages("dplyr")
+#check installed package
+installed.packages()
+#see all loaded package
+search()
+(.packages())
+#load the package
+library(tidyverse)
+#detach a package
+detach("package:tidyverse",unload=T)
+
+```
+
+kp2: generate random variates
+```{r}
+library(tibble)
+system.time(
+  myVec <- rnorm(1000000,mean=10,sd=5)
+)
+time <- c(0.073,0.667,6.458,66.591)
+sapSize <- c(1000000,10000000,100000000,1000000000)
+sapSize.m <- sapSize/1000000
+myDF <- tibble(sapSize.m,time)
+
+library(tidyverse)
+
+ggplot(data=myDF,aes(y=sapSize.m,x=time))+
+  geom_line(linetype="dotted")+
+  geom_point(size=4)+
+  xlab("The running time")+
+  ylab("The sample size of random variates in Millions")+
+  scale_y_continuous(labels = comma)
+```
+
+
+kp3: R markdown options
+
+create section / 
+and header #,##,###,####,#####,######
+To just show code out of code chunk, use 'a = 100'.
+To execute code out of code chunk, use 'r sum(c(10,220))'
+
+Chunk options:
+include: T means: evaluate code, but do not show result and code.
+Useful in load library, load data.
+
+echo: T means show the code. F is used when you just need the output. 
+Useful in making graph, giving summary statistics.
+
+eval: T means to evaluate the code. F means just no do it.
+Useful in just showing the code, may be used for comparison.
+
+message: F prevent message showing.
+
+cache: T store the result in the code chunk for future use.
+
+
+```{r}
+knitr::opts_chunk(echo=TRUE)
+?type
+
+```
+
+
+kp4:show good table
+```{r}
+knitr::kable(dplyr::slice(mtcars,1:5))
+```
+
+kp5:type,class,mode decipher
+
+type:
+*typeof* determines the (R internal) type or storage mode of any object.
+
+Current values are the vector types **"logical", "integer", "double", "complex", "character",** "raw" and "list", "NULL", "closure" (function), "special" and "builtin" (basic functions and operators), "environment", "S4" (some S4 objects)
+
+5 common types: 
+character,double,integer,logical,na
+
+Coercion: logical -> integer -> double -> character
+
+exp:typeof(100) is a double type. Strange.
+
+you can also use is.atomic(someVec) to check about the type of vector. 
+
+mode: 
+Get or set the type or storage mode of an object.
+types "integer" and "double" are returned as "numeric".
+
+mode(x) <- "newmode" changes the mode of object x to newmode. This is only supported if there is an appropriate as.newmode function, for example "logical", "integer", "double", "complex", "raw", "character", "list", "expression", "name", "symbol" and "function".
+
+'a' has class character,
+100L has class numeric
+
+```{r}
+?type
+
+vec <- seq(from=99,to = 96,by=-1)
+typeof(vec[1])
+typeof(100L)
+mode('a')
+mode(TRUE)
+mode(0.4)
+mode(100L)
+
+myFavNum <- 3.1415
+myNums <- c(1, 3, 55, 33, 86, -sqrt(2), -110) # also works myNums <- 1:7
+firstNames <- c("Jeff", "Terence", "David") 
+myVec <- c("Parr", 99)
+
+d <- myFavNum+myNums[7]
+#when you add a number to a atomic vector, each entry will get added.
+dd <- myFavNum+myNums
+(sum <- myFavNum+sum(myNums))
+#the myVec will auto change type of data to most flexible, which will be character.
+rs <- myVec[2]+myNums[2]
+```
+kp6:NA
+```{r}
+#create double NAs
+NA_real_(10)
+```
+
+```{r}
+#use order to arrange the vector, which will give the index of small value to large value.
+myVec <- c(99.1, 98.2, 97.3, 96.4)
+(order(myVec))
+# Use the order sequence to print the ordered vector.
+myVec[order(myVec)]
+myVec[-c(-1)]
+```
+ex about vector
+```{r}
+myAt <- c(1, 4, 3, 2, NA, 3.22, -44, 2, NA, 0, 22, 34)
+sum( myAt>0|myAt<0,na.rm=T)
+```
+kp7: list
+```{r}
+x1 <- list(c(1, 2), c(3, 4))
+class(x1[1])
+x2 <- list(list(1, 2), list(3, 4))
+class(x2[1])
+class(x1[[2]][1])#3
+x1[[2]][1]#3 4
+x1[[2]][[1]]#3
+class(x1[2][1])#
+```
+
+kp8: factor 
+based on integer vector, with two more attributes:
+class() and levels(). The first make it behaves differently,
+the latter define the kinds of data it can have.
+
+```{r}
+bodyType <- factor(c("healthy", "healthy", "healthy", "obese", "overweight", "overweight", "skinny"))
+                  
+str(bodyType)
+```
+Notice the levles healthy, obese,overweight,skinny is ordered by its appearance's order. And factor will assign an integer value w.r.t the level. 
+
+But the integer comarison fails and we need to tell factor to use levels and sort by it. 
+```{r}
+bodyType <- factor(c("h", "h", "h", "ob", "ov", "ov", "s"), levels = c("s", "h", "ov", "ob"),
+labels = c("Skinny", "Healthy", "Overweight", "Obese"), ordered = TRUE)
+
+levels(bodyType)
+
+bodyType[bodyType<"Overweight"]
+```
+
+Now the levels is mapped by skinny to 1, healthy to 2, so on.
+And we can use name in labels to select.
+
+```{r}
+mycyl <- mtcars$cyl
+mycyl
+mycYl <- factor(mycyl,levels=c(4,6,8),labels=c("Small","Medium","Large"),ordered = T)
+length(mycYl[mycYl<="Medium"])
+```
+
+```{r}
+set.seed(4)
+ageData <- round(runif(1000000, 0, 120))
+groups <- cut(ageData,breaks=c(-Inf,2,5,9,12,19,65,Inf),levles=c("infant", "toddler", "child", "tween", "teen", "adult", "senior"),labels = c("infant", "toddler", "child", "tween", "teen", "adult", "senior"),ordered=T)
+knitr::kable(groups)
+```
+
+```{r}
+x <- matrix(1:10, ncol = 5, nrow = 2)
+x
+x[,1:3]
+
+y <- array(1:12, c(2, 3, 2))
+(y)
+y[,,2]
+```
+```{r}
+seqq <- 1:5
+typeof(seqq)
+?logical
+logical(TRUE)
+```
+
+
+```{r}
+df1 <- dplyr::starwars %>% select(height, homeworld) %>%
+group_by(homeworld) %>%
+summarise(meanHeight = mean(height, na.rm = T)) %>%
+arrange(desc(meanHeight)) %>% ungroup() %>%
+head(5)
+
+df2 <- dplyr::starwars %>% select(height, homeworld) %>%
+filter(homeworld %in% x[["homeworld"]])
+```
+
+
+kp: about group
+```{r}
+x <- as.character(1949:2017)
+y <- runif(length(x),-20,20)
+myDF <- data.frame(year=x,annualReturn = y)
+
+ggplot(myDF)+geom_line(aes(x=year,y=annualReturn),group=1)
+```
+Compute the percentage of national population in each state. The result/output should look exactly like this, although it is truncated in length for ease of exposition):
+```{r}
+census <- read.csv("~/classes/msan593/data/2015census.csv")
+library(magrittr)
+library(dplyr)
+census %>% group_by(State) %>% 
+  summarise(totalPopu = sum(TotalPop)) %>% 
+    mutate(popPerct = totalPopu/sum(totalPopu) * 100) %>% 
+      arrange(desc(popPerct)) %>% 
+        head(5) %>% 
+  knitr::kable()
+
+census1 <- census %>% select(State,TotalPop)
+census1 %>% group_by(State) %>% summarise(tot=sum(TotalPop)) %>% arrange(desc(tot))
+```
+
+
+
+```{r}
+data <- mtcars
+str(data)
+
+data1 <- data %>% group_by(cyl,gear) %>% summarize(n=n())
+data1 %>% count(cyl,gear)
+```
+
+
+
+

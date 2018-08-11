@@ -1,0 +1,56 @@
+---
+title: "regular_expression"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(tidyverse)
+library(stringr)
+```
+get dataset
+```{r}
+data <- words
+stringr::str_subset(words,"d{2}")
+str_subset(words,"(ish+)")
+str_subset(words,"(ah+)")
+str_subset(words,"^b+(y+$)")
+```
+Write a regex to find all ".jpg"" file.
+
+```{r}
+str_subset(dir,"\\w+\\.(jpe?g|JPE?G){1}$")
+```
+
+```{r}
+str_subset(state.name,"z")
+str_subset(state.name,"(ss)+")
+str_subset(state.name,"s{1,2}")
+str_subset(state.name,"i\\w*i")
+str_subset(state.name,"\\s+")
+str_subset(state.name,"^(North|South){1}")
+#q2
+str_subset(fruit,"(melons?)")
+str_subset(fruit,"berry")
+str_subset(fruit,"\\S{1}berry")
+str_subset(fruit,"berry")
+#q3 write us phone number's regex
+phone <- c("765-418-6533","+1-010-001-0001","(010)-111-1234")
+"^\\d{3}-\\d{3}-\\d{4}$"
+# account for number starting with +1 111-111-1111
+"^(\\+1)? ?-\\d{3}-\\d{3}-\\d{4}$"
+"^(?\\d{3})?-\\d{3}-\\d{4}$"
+str_subset(phone,"^(\\+1)? ?(\\(?\\d{3}\\)?|\\d{3})-\\d{3}-\\d{4}$")
+
+```
+Test on function creation.
+```{r}
+myFunc <- function(maxIter = 10, reps=10,k) maxIter*reps + k
+myFunc()
+myFunc(k=3)
+myFunc(,,k=2)
+myFunc(2)
+```
+

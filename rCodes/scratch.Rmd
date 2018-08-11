@@ -1,0 +1,53 @@
+---
+title: "Case_study_ggplotAnddplyr"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+```
+
+## Case study of ggplot and dplyr
+
+Load the diamonds dataset.
+```{r }
+data <- ggplot2::diamonds
+glimpse(data)
+```
+
+test on geom_line
+```{r echo=T}
+ggplot(data=data)+geom_line(aes(x=carat,y=price),size=0.05,alpha=1)
+
+```
+
+Test on geom_jitter
+```{r}
+ggplot(data=data)+geom_jitter(aes(x=cut,y=price),size=0.1,color="#FF3333")
+```
+Compare jitter with points
+```{r}
+ggplot(data=data)+geom_point(aes(x=cut,y=price),size=0.1,color="#FF3300")
+```
+Try on geom_text&geom_label:
+geom_text: adds text directly to the plot and 
+geom_label:draws a rectangle behind the text, making it easier to read.
+```{r}
+data %>% 
+  count(cut) %>% 
+    ggplot()+
+      geom_bar(aes(x=cut,y=n),stat="identity",fill="#FF3300")+
+        geom_text(aes(x=cut,y=n,label=n),color="003300")+
+          geom_label(aes(x=cut,y=n,label=n),fill="grey50")
+```
+Test on scale_fill_discrete
+```{r}
+ggplot(data)+geom_area(aes(x=price),fill="#00CC00",color="#00CC33",stat="bin")+scale_fill_brewer(palette="Blues")
+```
+
