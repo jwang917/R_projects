@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r include=F}
 library(stringr)
+library(dplyr)
+library(data.table)
 ```
 
 ### Instructions
@@ -249,6 +251,70 @@ Your objective is to code a $k$-means algorithm from scratch. Your function will
 * `myClusterNum`: an integer value greater than or equal to 2 but less than or equal to $n$
     + $2<$ `myClusterNum` $<n$: `myClusterNum` $\in \mathbb{Z}$
 
+
+
+
+
+*Some thing about code efficiency:*
+I think it is proper to test individual code sections of the whole function so as to find the parts which consume the most of running time. In this case, I need to use $microbenchmark$ function to measure the performance.
+By this answer in Stackoverflow, the blog points out that main performance hint in R is to use vectorized action instead of using loops.
+1. The 'apply' family of functions (among others) are not "hidden loops" or loop wrappers. They are loops implemented in C--big difference performance-wise, except the function apply.
+2. Data type should be carefully chosen, integer is stored as double in R, we need to coerced to proper data type. 
+https://stackoverflow.com/questions/1971323/efficiency-of-operations-on-r-data-structures
+
+
+*To assign each observations with a cluster, I will use $sample.int$ with replace = Tas my choice of generating cluster set number.*
+```{r cache = TRUE}
+numObs <- 200
+groups <- sample.int(numObs,numObs,replace=T) #type is integer
+
+```
+Now, the $groups$ will be the observation's cluster indeices.
+
+```{r}
+# to compute the centroid.
+#get the data source.
+set.seed(101)
+mat <- matrix(rnorm(1000), ncol = 5)
+```
+
+
+```{r}
+assignCluster <- function(myClusterNum,numObs){
+  groups <- sample.int(myClusterNum,size=numObs,replace=T)
+}
+```
+
+```{r, eval = F}
+    set.seed(101)
+    myDF <- as.data.frame(matrix(rnorm(10000), ncol = 5))
+    myDF[2] <- myDF[2] + 5 
+    myDF[3] <- myDF[3] - 0.1
+    myDF[4] <- myDF[4] + 1 
+    myDF[5] <- myDF[5] - 3 
+    ```
+
+*Compute the centroid:*
+By using group_by in the data set to get every observations in a group to compute the mean of each features. Then we get the grouped cluster data set, now we can use summarize_all to compute the mean of each feature.
+
+
+```{r}
+getCentroid <- function(myScatterInput,myClusterNum){
+  dt.my <- as.data.table(myScatterInput)
+  numObs <- nrow(myScatterInput)
+  groups <- assignCluster(myClusterNum,numObs)
+  myScatterInput[numObs+1] <- groups
+  centroidVec <- dt.my %>% group_by(V6) %>% summarise_all(mean)
+}
+```
+
+To compute the distance between cluster centroid with all other points. For each centroid's cluster, we already have a centroid vector. To get distance between a point and the centroid, we 
+```{r}
+
+
+```
+
+
 Your function should:
 
 1. Randomly assign each of the points in `myScatterInput` to some value between 1 and `myClusterNum`. This is the initial, random assignment of points to each cluster. 
@@ -279,15 +345,6 @@ Your function should:
 * You may use base `R` functions or packages to compute distances
 
 * Use can use subsets of following data frame to test your code (use smaller subsets of both rows and columns, and grow to the full data frame, varying $k$):
-
-    ```{r, eval = F}
-    set.seed(101)
-    myDF <- as.data.frame(matrix(rnorm(10000), ncol = 5))
-    myDF[2] <- myDF[2] + 5 
-    myDF[3] <- myDF[3] - 0.1
-    myDF[4] <- myDF[4] + 1 
-    myDF[5] <- myDF[5] - 3 
-    ```
 
 * At 17:00 on Monday, August 13th, I will post code on the Slack channel to generate various data sets, which I want you to test your code on and report back processing time in your homework. Students with the fatest processing time for each individual test data set, as well as the student with the fatest aggregate processing time will receive bonus marks on the homework.
 
